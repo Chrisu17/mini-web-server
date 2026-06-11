@@ -76,14 +76,18 @@ void handle_client(int client_fd) {
         struct stat file_stat;
         fstat(file_fd, &file_stat);
         
-        char header[512];
-        snprintf(header, sizeof(header), 
-                 "HTTP/1.1 200 OK\r\n"
-                 "Content-Type: text/html\r\n"
-                 "Content-Length: %ld\r\n"
-                 "\r\n", file_stat.st_size);
-                 
-        write(client_fd, header, strlen(header));
+        // Set default ke HTML
+    char *content_type = "text/html"; 
+    
+    // Kalau di URL ada kata .jpg atau .jpeg, ubah jadi gambar
+    if (strstr(path, ".jpeg") != NULL || strstr(path, ".jpg") != NULL) {
+        content_type = "image/jpeg";
+    }
+
+    // Rakit header-nya lalu kirim
+    char header[256];
+    snprintf(header, sizeof(header), "HTTP/1.1 200 OK\r\nContent-Type: %s\r\n\r\n", content_type);
+    write(client_fd, header, strlen(header));
 
         int bytes_read_file;
         while ((bytes_read_file = read(file_fd, buffer, sizeof(buffer))) > 0) {
